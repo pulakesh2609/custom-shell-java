@@ -16,16 +16,17 @@ public class Main {
                     System.out.println(input.substring(5));
                 }
             else if(input.startsWith(("type"))){
+                String command = input.substring(5);
 
-                if(input.startsWith("echo") || input.startsWith("type") || input.startsWith("exit")){
-                    System.out.println(input.substring(5) +" is a shell builtin");
+                if(command.equals("echo") || command.equals("type") || command.equals("exit")){
+                    System.out.println(command +" is a shell builtin");
                 }
                 else{
-                    System.out.println(input.substring(5) + " not found");
+                    System.out.println(command + " not found");
                 }
             }
             else{
-                    System.out.println(input.substring(5) +": command not found");
+                    System.out.println(input +": command not found");
                 }
         }
 
