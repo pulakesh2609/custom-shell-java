@@ -5,19 +5,27 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
         Scanner scanner = new Scanner(System.in);
-
         while(true){
 
             System.out.print("$ ");
-            String Input = scanner.nextLine();
-            if(Input.equals ("exit")) {
+            String input = scanner.nextLine();
+            if(input.equals ("exit")) {
                 break;
             }
-            else if(Input.startsWith("echo ")) {
-                    System.out.println(Input.substring(5));
+            else if(input.startsWith("echo ")) {
+                    System.out.println(input.substring(5));
                 }
+            else if(input.startsWith(("type"))){
+
+                if(input.startsWith("echo") || input.startsWith("type") || input.startsWith("exit")){
+                    System.out.println(input +": is a shell command");
+                }
+                else{
+                    System.out.println(input + ": not found");
+                }
+            }
             else{
-                    System.out.println(Input +": command not found");
+                    System.out.println(input +": command not found");
                 }
         }
 
