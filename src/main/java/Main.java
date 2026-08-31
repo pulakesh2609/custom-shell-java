@@ -3,20 +3,22 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        System.out.print("$ ");
 
         Scanner scanner = new Scanner(System.in);
-        String input = scanner.nextLine();
-        System.out.println(input + ": command not found");
 
         while(true){
 
             System.out.print("$ ");
             String Input = scanner.nextLine();
-            if(Input.equals ("exit")){
+            if(Input.equals ("exit")) {
                 break;
             }
-            System.out.println(Input + ": command not found");
+            else if(Input.startsWith("echo ")) {
+                    System.out.println(Input.substring(5));
+                }
+            else{
+                    System.out.println(Input +": command not found");
+                }
         }
 
     }
