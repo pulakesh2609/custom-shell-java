@@ -12,8 +12,8 @@ public class Main {
         while(true){
 
             System.out.print("$ ");
-            String input = scanner.nextLine();
-            System.out.println(input + ": commnad not found");
+            String Input = scanner.nextLine();
+            System.out.println(Input + ": command not found");
         }
 
     }
