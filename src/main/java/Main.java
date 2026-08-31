@@ -7,11 +7,11 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine();
-        System.out.print(input + ": command not found");
+        System.out.println(input + ": command not found");
 
         while(true){
 
-            System.out.println("$ ");
+            System.out.print("$ ");
             String Input = scanner.nextLine();
             System.out.println(Input + ": commnad not found");
         }
