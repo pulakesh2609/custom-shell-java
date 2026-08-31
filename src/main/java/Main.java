@@ -1,4 +1,3 @@
-import java.sql.SQLOutput;
 import java.util.Scanner;
 import java.io.File;
 
@@ -14,8 +13,8 @@ public class Main {
                 break;
             }
             else if(input.startsWith("echo ")) {
-                    System.out.println(input.substring(5));
-                }
+                System.out.println(input.substring(5));
+            }
             else if(input.startsWith(("type"))){
                 String command = input.substring(5);
 
@@ -24,30 +23,45 @@ public class Main {
                 }
 
                 else {
-                    String path = System.getenv("PATH");
-                    String[] dirs = path.split(File.pathSeparator);
-                    boolean found = false;
-
-                    for (String dir : dirs) {
-                        File file = new File(dir, command);
-                        if (file.exists() && file.canExecute()) {
-                            System.out.println(command + " is " + file.getPath());
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found){
-                            System.out.println(command + ": not found");
-                         }
+                    File executable = resolveExecutable(command);
+                    if (executable != null) {
+                        System.out.println(command + " is " + executable.getPath());
+                    } else {
+                        System.out.println(command + ": not found");
                     }
                 }
+            }
             else{
-                System.out.println(input +": command not found");
+                String[] parts = input.split(" ");
+                String command = parts[0];
+                File executable = resolveExecutable(command);
+
+                if (executable != null) {
+                    ProcessBuilder pb = new ProcessBuilder(parts);
+                    pb.inheritIO();
+                    Process process = pb.start();
+                    process.waitFor();
+                } else {
+                    System.out.println(input +": command not found");
                 }
+            }
 
 
         }
 
 
+    }
+
+    private static File resolveExecutable(String command) {
+        String path = System.getenv("PATH");
+        String[] dirs = path.split(File.pathSeparator);
+
+        for (String dir : dirs) {
+            File file = new File(dir, command);
+            if (file.exists() && file.canExecute()) {
+                return file;
+            }
+        }
+        return null;
     }
 }
