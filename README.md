@@ -19,6 +19,7 @@ Study and uncomment the relevant code, then run the command below to execute the
 tests on our servers:
 
 ```sh
+
 codecrafters submit
 ```
 
