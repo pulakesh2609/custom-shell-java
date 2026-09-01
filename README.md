@@ -13,6 +13,7 @@ REPLs, builtin commands, and more.
 
 # Passing the first stage
 
+
 The entry point for your `shell` implementation is in `src/main/java/Main.java`.
 Study and uncomment the relevant code, then run the command below to execute the
 tests on our servers:
