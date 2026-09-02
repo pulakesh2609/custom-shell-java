@@ -14,18 +14,29 @@ public class Main {
             System.out.print("$ ");
             String input = scanner.nextLine();
 
-            // Detect and strip stdout (> or 1>) and stderr (2>) redirection
             String[] tokens = input.split(" ");
             List<String> commandTokens = new ArrayList<>();
             String outputFile = null;
             String errorFile = null;
+            boolean appendOutput = false;
+            boolean appendError = false;
 
             for (int i = 0; i < tokens.length; i++) {
                 if (tokens[i].equals(">") || tokens[i].equals("1>")) {
                     outputFile = tokens[i + 1];
+                    appendOutput = false;
+                    i++;
+                } else if (tokens[i].equals(">>") || tokens[i].equals("1>>")) {
+                    outputFile = tokens[i + 1];
+                    appendOutput = true;
                     i++;
                 } else if (tokens[i].equals("2>")) {
                     errorFile = tokens[i + 1];
+                    appendError = false;
+                    i++;
+                } else if (tokens[i].equals("2>>")) {
+                    errorFile = tokens[i + 1];
+                    appendError = true;
                     i++;
                 } else {
                     commandTokens.add(tokens[i]);
@@ -35,7 +46,7 @@ public class Main {
             String commandLine = String.join(" ", commandTokens);
             PrintStream out = System.out;
             if (outputFile != null) {
-                out = new PrintStream(new FileOutputStream(outputFile));
+                out = new PrintStream(new FileOutputStream(outputFile, appendOutput));
             }
 
             if (commandLine.equals("exit")) {
@@ -63,13 +74,17 @@ public class Main {
                     ProcessBuilder pb = new ProcessBuilder(commandTokens);
 
                     if (outputFile != null) {
-                        pb.redirectOutput(new File(outputFile));
+                        pb.redirectOutput(appendOutput
+                                ? ProcessBuilder.Redirect.appendTo(new File(outputFile))
+                                : ProcessBuilder.Redirect.to(new File(outputFile)));
                     } else {
                         pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                     }
 
                     if (errorFile != null) {
-                        pb.redirectError(new File(errorFile));
+                        pb.redirectError(appendError
+                                ? ProcessBuilder.Redirect.appendTo(new File(errorFile))
+                                : ProcessBuilder.Redirect.to(new File(errorFile)));
                     } else {
                         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
                     }
