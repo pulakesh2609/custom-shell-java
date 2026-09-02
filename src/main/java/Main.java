@@ -14,17 +14,22 @@ public class Main {
             System.out.print("$ ");
             String input = scanner.nextLine();
 
-            // Detect and strip stdout redirection ( > or 1> )
+            // Detect and strip stdout (> or 1>) and stderr (2>) redirection
             String[] tokens = input.split(" ");
             List<String> commandTokens = new ArrayList<>();
             String outputFile = null;
+            String errorFile = null;
 
             for (int i = 0; i < tokens.length; i++) {
                 if (tokens[i].equals(">") || tokens[i].equals("1>")) {
                     outputFile = tokens[i + 1];
-                    break;
+                    i++;
+                } else if (tokens[i].equals("2>")) {
+                    errorFile = tokens[i + 1];
+                    i++;
+                } else {
+                    commandTokens.add(tokens[i]);
                 }
-                commandTokens.add(tokens[i]);
             }
 
             String commandLine = String.join(" ", commandTokens);
@@ -56,13 +61,21 @@ public class Main {
 
                 if (executable != null) {
                     ProcessBuilder pb = new ProcessBuilder(commandTokens);
+
                     if (outputFile != null) {
                         pb.redirectOutput(new File(outputFile));
-                        pb.redirectError(ProcessBuilder.Redirect.INHERIT);
-                        pb.redirectInput(ProcessBuilder.Redirect.INHERIT);
                     } else {
-                        pb.inheritIO();
+                        pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                     }
+
+                    if (errorFile != null) {
+                        pb.redirectError(new File(errorFile));
+                    } else {
+                        pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+                    }
+
+                    pb.redirectInput(ProcessBuilder.Redirect.INHERIT);
+
                     Process process = pb.start();
                     process.waitFor();
                 } else {
