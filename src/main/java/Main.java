@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
+    static String currentDir = System.getProperty("user.dir");
+
     public static void main(String[] args) throws Exception {
 
         Scanner scanner = new Scanner(System.in);
@@ -64,7 +66,28 @@ public class Main {
 
             if (command.equals("exit")) {
                 break;
-            } else if (command.equals("echo")) {
+            }
+            else if (command.equals("pwd")) {
+                out.println(currentDir);
+            }
+            else if (command.equals("cd")) {
+                String target = commandTokens.size() > 1
+                        ? commandTokens.get(1)
+                        : (System.getenv("HOME") != null ? System.getenv("HOME") : System.getenv("USERPROFILE"));
+
+                if (target.equals("~")) {
+                    target = System.getenv("HOME") != null ? System.getenv("HOME") : System.getenv("USERPROFILE");
+                }
+
+                File dir = new File(target).isAbsolute() ? new File(target) : new File(currentDir, target);
+
+                if (dir.exists() && dir.isDirectory()) {
+                    currentDir = dir.getCanonicalPath();
+                } else {
+                    out.println("cd: " + target + ": No such file or directory");
+                }
+            }
+            else if (command.equals("echo")) {
                 String output = String.join(" ", commandTokens.subList(1, commandTokens.size()));
                 out.println(output);
             } else if (command.equals("type")) {
@@ -84,6 +107,7 @@ public class Main {
 
                 if (executable != null) {
                     ProcessBuilder pb = new ProcessBuilder(commandTokens);
+                    pb.directory(new File(currentDir));
 
                     if (outputFile != null) {
                         pb.redirectOutput(appendOutput
