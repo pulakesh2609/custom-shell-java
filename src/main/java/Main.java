@@ -3,6 +3,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +54,11 @@ public class Main {
                 continue;
             }
 
+            if (commandTokens.contains("|")) {
+                runPipeline(commandTokens, outputFile, appendOutput, errorFile, appendError);
+                continue;
+            }
+
             PrintStream out = System.out;
             if (outputFile != null) {
                 try {
@@ -92,7 +99,8 @@ public class Main {
                 out.println(output);
             } else if (command.equals("type")) {
                 String target = commandTokens.size() > 1 ? commandTokens.get(1) : "";
-                if (target.equals("echo") || target.equals("type") || target.equals("exit")) {
+                if (target.equals("echo") || target.equals("type") || target.equals("exit")
+                        || target.equals("pwd") || target.equals("cd")) {
                     out.println(target + " is a shell builtin");
                 } else {
                     File executable = resolveExecutable(target);
@@ -136,6 +144,141 @@ public class Main {
 
             if (outputFile != null) {
                 out.close();
+            }
+        }
+    }
+
+    private static void runPipeline(List<String> commandTokens, String outputFile, boolean appendOutput,
+                                    String errorFile, boolean appendError) throws Exception {
+        List<List<String>> stages = new ArrayList<>();
+        List<String> currentStage = new ArrayList<>();
+        for (String token : commandTokens) {
+            if (token.equals("|")) {
+                stages.add(currentStage);
+                currentStage = new ArrayList<>();
+            } else {
+                currentStage.add(token);
+            }
+        }
+        stages.add(currentStage);
+
+        byte[] inputData = null;
+
+        for (int i = 0; i < stages.size(); i++) {
+            List<String> stageTokens = stages.get(i);
+            if (stageTokens.isEmpty()) continue;
+
+            String command = stageTokens.get(0);
+            boolean isLast = (i == stages.size() - 1);
+
+            if (isPipelineBuiltin(command)) {
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                PrintStream stageOut;
+                boolean closeStageOut = false;
+
+                if (isLast) {
+                    if (outputFile != null) {
+                        stageOut = new PrintStream(new FileOutputStream(outputFile, appendOutput));
+                        closeStageOut = true;
+                    } else {
+                        stageOut = System.out;
+                    }
+                } else {
+                    stageOut = new PrintStream(buffer);
+                }
+
+                runPipelineBuiltin(stageTokens, stageOut);
+
+                if (!isLast) {
+                    stageOut.flush();
+                    inputData = buffer.toByteArray();
+                }
+                if (closeStageOut) {
+                    stageOut.close();
+                }
+            } else {
+                File executable = resolveExecutable(command);
+                if (executable == null) {
+                    System.out.println(command + ": command not found");
+                    return;
+                }
+
+                ProcessBuilder pb = new ProcessBuilder(stageTokens);
+                pb.directory(new File(currentDir));
+
+                pb.redirectInput(i == 0 ? ProcessBuilder.Redirect.INHERIT : ProcessBuilder.Redirect.PIPE);
+
+                if (isLast) {
+                    pb.redirectOutput(outputFile != null
+                            ? (appendOutput ? ProcessBuilder.Redirect.appendTo(new File(outputFile))
+                            : ProcessBuilder.Redirect.to(new File(outputFile)))
+                            : ProcessBuilder.Redirect.INHERIT);
+                } else {
+                    pb.redirectOutput(ProcessBuilder.Redirect.PIPE);
+                }
+
+                if (isLast && errorFile != null) {
+                    pb.redirectError(appendError
+                            ? ProcessBuilder.Redirect.appendTo(new File(errorFile))
+                            : ProcessBuilder.Redirect.to(new File(errorFile)));
+                } else {
+                    pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+                }
+
+                Process process = pb.start();
+
+                if (i != 0) {
+                    if (inputData != null) {
+                        process.getOutputStream().write(inputData);
+                    }
+                    process.getOutputStream().close();
+                }
+
+                if (!isLast) {
+                    inputData = process.getInputStream().readAllBytes();
+                }
+
+                process.waitFor();
+            }
+        }
+    }
+
+    private static boolean isPipelineBuiltin(String command) {
+        return command.equals("pwd") || command.equals("cd") || command.equals("echo") || command.equals("type");
+    }
+
+    private static void runPipelineBuiltin(List<String> stageTokens, PrintStream out) throws IOException {
+        String command = stageTokens.get(0);
+
+        if (command.equals("pwd")) {
+            out.println(currentDir);
+        } else if (command.equals("cd")) {
+            String target = stageTokens.size() > 1
+                    ? stageTokens.get(1)
+                    : (System.getenv("HOME") != null ? System.getenv("HOME") : System.getenv("USERPROFILE"));
+            if (target.equals("~")) {
+                target = System.getenv("HOME") != null ? System.getenv("HOME") : System.getenv("USERPROFILE");
+            }
+            File dir = new File(target).isAbsolute() ? new File(target) : new File(currentDir, target);
+            if (dir.exists() && dir.isDirectory()) {
+                currentDir = dir.getCanonicalPath();
+            } else {
+                out.println("cd: " + target + ": No such file or directory");
+            }
+        } else if (command.equals("echo")) {
+            out.println(String.join(" ", stageTokens.subList(1, stageTokens.size())));
+        } else if (command.equals("type")) {
+            String target = stageTokens.size() > 1 ? stageTokens.get(1) : "";
+            if (target.equals("echo") || target.equals("type") || target.equals("exit")
+                    || target.equals("pwd") || target.equals("cd")) {
+                out.println(target + " is a shell builtin");
+            } else {
+                File executable = resolveExecutable(target);
+                if (executable != null) {
+                    out.println(target + " is " + executable.getPath());
+                } else {
+                    out.println(target + ": not found");
+                }
             }
         }
     }
