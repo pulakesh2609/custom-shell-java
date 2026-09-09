@@ -91,23 +91,23 @@ public class Main {
                 if (dir.exists() && dir.isDirectory()) {
                     currentDir = dir.getCanonicalPath();
                 } else {
-                    out.println("cd: " + target + ": No such file or directory");
+                    System.out.println("cd: " + target + ": No such file or directory");
                 }
             }
             else if (command.equals("echo")) {
                 String output = String.join(" ", commandTokens.subList(1, commandTokens.size()));
-                out.println(output);
+                System.out.println(output);
             } else if (command.equals("type")) {
                 String target = commandTokens.size() > 1 ? commandTokens.get(1) : "";
                 if (target.equals("echo") || target.equals("type") || target.equals("exit")
                         || target.equals("pwd") || target.equals("cd")) {
-                    out.println(target + " is a shell builtin");
+                    System.out.println(target + " is a shell builtin");
                 } else {
                     File executable = resolveExecutable(target);
                     if (executable != null) {
-                        out.println(target + " is " + executable.getPath());
+                        System.out.println(target + " is " + executable.getPath());
                     } else {
-                        out.println(target + ": not found");
+                        System.out.println(target + ": not found");
                     }
                 }
             } else {
@@ -263,21 +263,21 @@ public class Main {
             if (dir.exists() && dir.isDirectory()) {
                 currentDir = dir.getCanonicalPath();
             } else {
-                out.println("cd: " + target + ": No such file or directory");
+                System.out.println("cd: " + target + ": No such file or directory");
             }
         } else if (command.equals("echo")) {
-            out.println(String.join(" ", stageTokens.subList(1, stageTokens.size())));
+            System.out.println(String.join(" ", stageTokens.subList(1, stageTokens.size())));
         } else if (command.equals("type")) {
             String target = stageTokens.size() > 1 ? stageTokens.get(1) : "";
             if (target.equals("echo") || target.equals("type") || target.equals("exit")
                     || target.equals("pwd") || target.equals("cd")) {
-                out.println(target + " is a shell builtin");
+                System.out.println(target + " is a shell builtin");
             } else {
                 File executable = resolveExecutable(target);
                 if (executable != null) {
-                    out.println(target + " is " + executable.getPath());
+                    System.out.println(target + " is " + executable.getPath());
                 } else {
-                    out.println(target + ": not found");
+                    System.out.println(target + ": not found");
                 }
             }
         }
