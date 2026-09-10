@@ -1,37 +1,14 @@
-[![progress-banner](https://backend.codecrafters.io/progress/shell/ef0ce842-0d64-4fc7-91af-41b5ff514703)](https://app.codecrafters.io/users/pulakesh2609?r=2qF)
+# Custom Shell (Java)
 
-This is a starting point for Java solutions to the
-["Build Your Own Shell" Challenge](https://app.codecrafters.io/courses/shell/overview).
+A POSIX-like shell implemented from scratch in Java — supports builtin commands, external program execution, I/O redirection, pipelines, and shell-style quoting.
 
-In this challenge, you'll build your own POSIX compliant shell that's capable of
-interpreting shell commands, running external programs and builtin commands like
-cd, pwd, echo and more. Along the way, you'll learn about shell command parsing,
-REPLs, builtin commands, and more.
+## Features
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+- **Builtins**: `echo`, `type`, `pwd`, `cd`, `exit`
+- **External program execution** — resolves and runs any executable found in `PATH`, with full argument passing
+- **I/O redirection** — `>` / `1>` (stdout), `2>` (stderr), plus append variants `>>`, `1>>`, `2>>`
+- **Pipelines** — chain any number of commands with `|`, mixing builtins and external programs freely
+- **Quoting** — single quotes, double quotes, and backslash escaping, following real shell parsing rules
+- **Directory navigation** — `cd` with absolute paths, relative paths, and home directory (`~`)
 
-
-# Passing the first stage
-
-
-The entry point for your `shell` implementation is in `src/main/java/Main.java`.
-Study and uncomment the relevant code, then run the command below to execute the
-tests on our servers:
-
-```sh
-
-codecrafters submit
-```
-
-Time to move on to the next stage!
-
-# Stage 2 & beyond
-
-Note: This section is for stages 2 and beyond.
-
-1. Ensure you have `mvn` installed locally
-1. Run `./your_program.sh` to run your program, which is implemented in
-   `src/main/java/Main.java`.
-1. Run `codecrafters submit` to submit your solution to CodeCrafters. Test
-   output will be streamed to your terminal.
+## Example usage
