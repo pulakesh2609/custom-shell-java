@@ -96,16 +96,16 @@ public class Main {
             }
             else if (command.equals("echo")) {
                 String output = String.join(" ", commandTokens.subList(1, commandTokens.size()));
-                System.out.println(output);
+                out.println(output);
             } else if (command.equals("type")) {
                 String target = commandTokens.size() > 1 ? commandTokens.get(1) : "";
                 if (target.equals("echo") || target.equals("type") || target.equals("exit")
                         || target.equals("pwd") || target.equals("cd")) {
-                    System.out.println(target + " is a shell builtin");
+                    out.println(target + " is a shell builtin");
                 } else {
                     File executable = resolveExecutable(target);
                     if (executable != null) {
-                        System.out.println(target + " is " + executable.getPath());
+                        out.println(target + " is " + executable.getPath());
                     } else {
                         System.out.println(target + ": not found");
                     }
@@ -138,7 +138,7 @@ public class Main {
                     Process process = pb.start();
                     process.waitFor();
                 } else {
-                    out.println(command + ": command not found");
+                    System.out.println(command + ": command not found");
                 }
             }
 
@@ -266,16 +266,16 @@ public class Main {
                 System.out.println("cd: " + target + ": No such file or directory");
             }
         } else if (command.equals("echo")) {
-            System.out.println(String.join(" ", stageTokens.subList(1, stageTokens.size())));
+            out.println(String.join(" ", stageTokens.subList(1, stageTokens.size())));
         } else if (command.equals("type")) {
             String target = stageTokens.size() > 1 ? stageTokens.get(1) : "";
             if (target.equals("echo") || target.equals("type") || target.equals("exit")
                     || target.equals("pwd") || target.equals("cd")) {
-                System.out.println(target + " is a shell builtin");
+                out.println(target + " is a shell builtin");
             } else {
                 File executable = resolveExecutable(target);
                 if (executable != null) {
-                    System.out.println(target + " is " + executable.getPath());
+                    out.println(target + " is " + executable.getPath());
                 } else {
                     System.out.println(target + ": not found");
                 }
